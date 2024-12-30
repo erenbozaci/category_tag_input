@@ -46,7 +46,7 @@ Initialize the category tag input in your JavaScript:
 
 ```javascript
 const categoryTagInput = new CategoryTagInput({
-            selector: '#category-tag-input', // required
+            selector: '#category-tag-input', // required, <select> element 
             suggestions: [] // required
             maxTags: 2, // optional
             duplicate: false, // optional
