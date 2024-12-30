@@ -3,7 +3,7 @@
 * @author Eren Bozacı
 * @class CategoryTags
 * This class is used to create tags for categories input field.
-* v.1.0.0
+* v.1.1.0
 * */
 class Tag {
     /**
@@ -48,6 +48,8 @@ class CategoryTagInput {
             throw new Error('Info message should be a function');
         } else if (this.settings.placeholder && typeof this.settings.placeholder !== 'string') {
             throw new Error('Placeholder should be a string');
+        } else if (this.settings.initalTags && !Array.isArray(this.settings.initalTags)) {
+            throw new Error('Initial tags should be an array');
         }
         
         if (this.settings.infoMessage && this.settings.infoMessage(this.settings.maxTags)) {
