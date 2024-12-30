@@ -100,15 +100,21 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.tag-container .suggestions div {
+.tag-container .suggestions.hidden {
+    display: none;
+}
+
+.tag-container .suggestions .suggestion {
     padding: 5px;
     cursor: pointer;
 }
 
-.tag-container .suggestions div:hover {
+.tag-container .suggestions .suggestion:focus {
     background: #ddd;
+    outline: none;
 }
 
-.tag-container .suggestions.hidden {
-    display: none;
+
+.tag-container .suggestions .suggestion:hover {
+    background: #ddd;
 }

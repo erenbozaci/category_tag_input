@@ -5,28 +5,41 @@
 * This class is used to create tags for categories input field.
 * v.1.0.0
 * */
+class Tag {
+    /**
+     * @param {string} label - The label of the suggestion
+     * @param {string} value - The value of the suggestion
+     * @param {string} targetOption - The target option of the suggestion
+     */
+    constructor(label, value, targetOption) {
+        this.label = label;
+        this.value = value;
+        this.targetOption = targetOption;
+    }
+}
+
 class CategoryTagInput {
     /**
      * @param {Object} settings
      * @param {string} settings.selector - The selector of the input field
-     * @param {Array} settings.suggestions - The suggestions for the tags 
+     * @param {Array<string>} settings.initalTags - The initial tags, option values only (Optional, Default: [])
      * @param {string} settings.placeholder - The placeholder for the input field (Optional, Default: 'Add tags')
-     * @param {number} settings.maxTags - The maximum number of tags (Optional, Default: 5)
+     * @param {number} settings.maxTags - The maximum number of tags, 0 for infinty (Optional, Default: 5)
      * @param {boolean} settings.duplicate - The duplicate tags are allowed or not (Optional, Default: false)
      * @param {function} settings.infoMessage - The info message for the tags (Optional, Default: 'You can add 5 tags')
      */
     constructor(settings) {
         this.settings = settings;
+        /**
+         * @type {Array<Tag>} tags - The tags which are user added
+         */
         this.tags = [];
         this.suggestions = [];
+        this.initalTags = this.settings.initalTags || [];
         
         // errors
         if (!this.settings.selector) {
             throw new Error('Selector is required');
-        } else if (!this.settings.suggestions) {
-            throw new Error('Suggestions are required');
-        } else if (!Array.isArray(this.settings.suggestions)) {
-            throw new Error('Suggestions should be an array');
         } else if (this.settings.maxTags && typeof this.settings.maxTags !== 'number') {
             throw new Error('Max tags should be a number');
         } else if (this.settings.duplicate && typeof this.settings.duplicate !== 'boolean') {
@@ -40,50 +53,78 @@ class CategoryTagInput {
         if (this.settings.infoMessage && this.settings.infoMessage(this.settings.maxTags)) {
             this.infoMessageMethod = this.settings.infoMessage;
         } else {
-            this.infoMessageMethod = (maxTags) => `You can add ${this.maxTags} tags`;
+            this.infoMessageMethod = (maxTags) => `You can add only ${this.maxTags} tags`;
         }
 
-        this.onAdd = (tag) => { };
+
+
+        /**
+         * @type {function} onAdd - The callback function when a tag is added
+         * @param {Tag} tag - The tag which is added
+         */
+        this.onAdd = (tag) => {};
+        /**
+         * @type {function} onRemove - The callback function when a tag is removed
+         * @param {Tag} tag - The tag which is removed
+         */
         this.onRemove = (tag) => {};
+        /**
+         * @type {function} onTagChange - The callback function when tags are changed
+         * @param {Array<Tag>} tags - The tags which are user added
+         */
+        this.onTagChange = (tags) => {};
+        /**
+         * @type {function} onError - The callback function when an error occurs
+         * @param {string} message - The error message
+         */
         this.onError = (message) => {};
+        /**
+         * @type {function} onInputChange - The callback function when the input field is changed
+         * @param {string} value - The value of the input field
+         * 
+         */
+        this.onInputChange = (value) => {};
 
         this.init();
     }
 
     init() {
+        /**
+         * @type {HTMLSelectElement} selectInput - The input field
+         */
         this.selectInput = document.querySelector(this.settings.selector);
         this.selectInput.style.display = 'none';
         this.placeholder = this.settings.placeholder || 'Add tags';
-        this.maxTags = this.settings.maxTags || 5;
+        this.maxTags = this.settings.maxTags < 0 ? 5 : this.settings.maxTags;
         this.duplicate = this.settings.duplicate || false;
         this.parent = this.selectInput.parentNode;
 
         this.createHTMLElements();
 
         this.tagInput.addEventListener('keyup', this.handleInput.bind(this));
-    }
 
-    handleInput(e) {
-        const val = e.target.value;
-
-        // iF THE USER PRESS down arrow key
-        if (e.keyCode === 40 && this.suggestions.length > 0) {
-            this.suggestionContainer.querySelector('.suggestion').focus();
-            console.log('down arrow key pressed');
-            return;
+        if (this.initalTags.length > 0) {
+            console.log(this.initalTags);
+            
+            this.initalTags.forEach(tag => {
+                const option = this.selectInput.querySelector(`option[value="${tag}"]`);
+                this.addTag(new Tag(option.innerHTML, option.value, option));
+            });
         }
-
-        this.suggestTags(val);
     }
 
+    /**
+     * @param {Tag} tag 
+     * @returns 
+     */
     addTag(tag) {
-        if (this.tags.length >= this.maxTags) {
+        if (this.maxTags > 0 && this.tags.length >= this.maxTags) {
             this.handleError('You can add only '+ this.maxTags +' tags');
             return;
         } else if (!this.duplicate && this.tags.includes(tag)) {
             this.handleError('This tag is already added');
             return;
-        } else if (tag === '') {
+        } else if (tag.label === '' || tag.value === '') {
             this.handleError('Tag cannot be empty');
             return;
         }
@@ -94,6 +135,9 @@ class CategoryTagInput {
         this.onAdd(tag);
     }
 
+    /**
+     * @param {Tag} tag 
+     */
     removeTag(tag) {
         this.tags = this.tags.filter(t => t !== tag);
         this.renderTags();
@@ -102,7 +146,7 @@ class CategoryTagInput {
     }
 
     /**
-     * @param {string} event - The event name ('add', 'remove', 'error')
+     * @param {string} event - The event name ('add', 'remove', 'tagchange', 'inputchange', 'error',)
      * @param {function} callback - The callback function
      */
     on(event, callback) {
@@ -113,12 +157,30 @@ class CategoryTagInput {
             case 'remove':
                 this.onRemove = callback;
                 break;
+            case 'tagchange':
+                this.onTagChange = callback;
+                break;
+            case 'inputchange':
+                this.onInputChange = callback;
+                break;
             case 'error':
                 this.onError = callback;
-                break;
+                break;   
             default:
                 break;
         }
+    }
+
+    handleInput(e) {
+        const val = this.tagInput.value;
+
+        if (e.keyCode === 40 && this.suggestions.length > 0) {
+            this.suggestionContainer.querySelector('.suggestion').focus();
+            return;
+        }
+
+        this.suggestTags(val);
+        this.onInputChange(val);
     }
 
     handleError(message) {
@@ -129,15 +191,6 @@ class CategoryTagInput {
         }, 3000);
 
         this.onError(message);
-    }
-
-    suggestTags(val) {
-        if (val.length > 0) {
-            this.suggestions = this.settings.suggestions.filter(suggestion => suggestion.toLowerCase().includes(val.toLowerCase()) && !this.tags.includes(suggestion));
-            this.renderSuggestions();
-        } else {
-            if (!this.suggestionContainer.classList.contains('hidden')) this.suggestionContainer.classList.add('hidden')
-        }
     }
     
     createHTMLElements() {
@@ -161,10 +214,27 @@ class CategoryTagInput {
         this.tagContainer.appendChild(this.tagInput);
         this.parent.appendChild(this.tagContainer);
         this.parent.appendChild(this.errorContainer);
-        this.infoMessage = document.createElement('div');
-        this.infoMessage.classList.add('text-secondary');
-        this.infoMessage.innerHTML = this.infoMessageMethod(this.maxTags);
-        this.parent.appendChild(this.infoMessage);
+        if (this.maxTags > 0) {
+            this.infoMessage = document.createElement('div');
+            this.infoMessage.classList.add('text-secondary');
+            this.infoMessage.innerHTML = this.infoMessageMethod(this.maxTags);
+            this.parent.appendChild(this.infoMessage);
+        }
+    }
+
+    suggestTags(val) {
+        if (val.length > 0) {
+            this.suggestions = [...this.selectInput.options].filter(suggestion => {
+                const suggestionText = suggestion.innerHTML.toLowerCase();
+                const inputText = val.toLowerCase();
+                const isDuplicate = this.tags.some(tag => tag.value === suggestion.value);
+                return suggestionText.includes(inputText) && (this.duplicate || !isDuplicate);
+            });
+            
+            this.renderSuggestions();
+        } else {
+            if (!this.suggestionContainer.classList.contains('hidden')) this.suggestionContainer.classList.add('hidden')
+        }
     }
 
     renderSuggestions() {
@@ -180,20 +250,23 @@ class CategoryTagInput {
         this.suggestionContainer.innerHTML = '';
 
         this.suggestions.forEach(suggestion => {
+            const tag = new Tag(suggestion.innerHTML, suggestion.value, suggestion);
+
             const suggestionElement = document.createElement('div');
             suggestionElement.classList.add('suggestion');
             suggestionElement.setAttribute('tabindex', '0');
-            suggestionElement.innerHTML = suggestion;
+            suggestionElement.innerHTML = suggestion.innerHTML;
+            suggestionElement.dataset.ind = Array.from(this.suggestions).findIndex(s => s.innerHTML === suggestion.innerHTML);
             this.suggestionContainer.appendChild(suggestionElement);
 
             suggestionElement.addEventListener('click', e => {
-                this.addTag(e.target.innerHTML);
+                this.addTag(tag);
                 this.suggestionContainer.classList.add('hidden')
             });
 
             suggestionElement.addEventListener('keydown', e => {
                 if (e.key === 'Enter') {
-                    this.addTag(e.target.innerHTML);
+                    this.addTag(tag);
                     this.suggestionContainer.classList.add('hidden')
                 } else if (e.key === 'ArrowDown') {
                     if (suggestionElement.nextSibling) {
@@ -215,13 +288,17 @@ class CategoryTagInput {
         this.tags.forEach(tag => {
             const tagElement = document.createElement('span');
             tagElement.setAttribute('class', 'tag badge badge-primary');
-            tagElement.innerHTML = `<b>${tag}</b>&times;`; // it can be changed with an icon
+            tagElement.innerHTML = `<b>${tag.label}</b>&times;`; // &times; can be changed with an icon
             this.tagContainer.insertBefore(tagElement, this.tagInput);
 
+            tag.targetOption.selected = true;
+
             tagElement.addEventListener('click', e => {
-                this.removeTag(tagElement.querySelector("b").innerHTML);
+                this.removeTag(tag);
+                tag.targetOption.selected = false;
             });
         });
+        this.onTagChange(this.tags);
     }
     /**
      * @returns {Array} - The tags which are user added

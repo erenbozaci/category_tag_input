@@ -16,7 +16,7 @@ Navigate to the project directory:
 cd category_tag_input
 ```
 
-Open `index.html` file and everything in your service.
+Don't forget to look examples in `examples.html` file.
 
 
 ## Usage
@@ -39,19 +39,25 @@ in `<body>`
 Add the category tag input field to your HTML:
 
 ```html
-<div id="category-tag-input"></div>
+<div class="category-tag-input">
+    <select name="category-input[]" id="category-input" multiple>
+        <option value="value1">Data1</option>
+        <option value="value2">Data2</option>
+        ...
+    </select>
+</div>
 ```
 
 Initialize the category tag input in your JavaScript:
 
 ```javascript
 const categoryTagInput = new CategoryTagInput({
-            selector: '#category-tag-input', // required, <select> element 
-            suggestions: [] // required
-            maxTags: 2, // optional
-            duplicate: false, // optional
-            infoMessage: (maxTags) => `You are ${maxTags} tags` // optional
-        });
+    selector: '#category-input', // required, <select> element 
+    initialTags: ['value1', 'value2'], // optional, initial tags, only option values
+    maxTags: 2, // optional, 0 for infinity
+    duplicate: false, // optional
+    infoMessage: (maxTags) => `message` // optional
+});
 ```
 
 ## Contributing
