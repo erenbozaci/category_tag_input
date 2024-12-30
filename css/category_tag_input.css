@@ -1,0 +1,114 @@
+/**
+ * Category Tag Input CSS
+ * 
+ * @version 1.0.0
+ * @author Eren Bozacı
+ * @link
+ */
+.badge {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+
+.badge.badge-primary {
+    color: #fff;
+    background-color: #007bff;
+}
+
+.badge.badge-secondary {
+    color: #fff;
+    background-color: #6c757d;
+}
+
+.badge.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+
+.badge.badge-warning {
+    color: #212529;
+    background-color: #ffc107;
+}
+
+.badge.badge-info {
+    color: #fff;
+    background-color: #17a2b8;
+}
+
+.tag-container {
+    border: 1px solid #d0d4da;
+    padding: 5px;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.tag-container + .error {
+    margin-top: 5px;
+    color: #dc3545;
+}
+
+.tag-container:focus-within {
+    border-color: #96b8fd;
+}
+
+.tag-container span {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tag-container i {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.tag-container input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 1px 5px;
+}
+
+.tag-container .suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 99;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.tag-container .suggestions div {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.tag-container .suggestions div:hover {
+    background: #ddd;
+}
+
+.tag-container .suggestions.hidden {
+    display: none;
+}

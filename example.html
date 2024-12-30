@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Tag Input</title>
+    <link rel="stylesheet" href="./css/category_tag_input.css">
+</head>
+
+<body>
+    <h1>Example 1</h1>
+    <div class="category-tag-input">
+        <label for="categories">Categories</label>
+        <select name="categories[]" id="categories" multiple>
+            <option value="Comedy">Comedy</option>
+            <option value="Action">Action</option>
+            <option value="Drama">Drama</option>
+            <option value="Science Fiction">Science Fiction</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Horror">Horror</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Romantic">Romantic</option>
+        </select>
+    </div>
+        
+    <h1>Example 2</h1>
+    <div class="category-tag-input">
+        <select name="categories2[]" id="categories2" multiple>
+            <option value="Comedy">Comedy</option>
+            <option value="Action">Action</option>
+            <option value="Drama">Drama</option>
+            <option value="Science Fiction">Science Fiction</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Horror">Horror</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Romantic">Romantic</option>
+        </select>
+    </div>
+
+    <script src="./js/category_tag_input.js"></script>
+    <script>
+        
+        // usage 1
+        const categoryTags1 = new CategoryTagInput({
+            selector: '#categories',
+            suggestions: [
+                'Comedy',
+                'Action',
+                'Drama',
+                'Science Fiction',
+                'Fantasy',
+                'Horror',
+                'Thriller',
+                'Adventure',
+                'Documentary',
+                'Romantic',
+            ],
+            maxTags: 3,
+            duplicate: false
+        });
+
+        // usage 2
+        const categoryTags2 = new CategoryTagInput({
+            selector: '#categories2',
+            suggestions: [...document.getElementById("categories2").options].map(option => option.value),
+            maxTags: 2,
+            duplicate: false,
+            infoMessage: (maxTags) => `You are ${maxTags} tags`
+        });
+
+        // events
+        categoryTags1.on('add', (tag) => {
+            console.log('Added tag:', tag);
+            console.log(categoryTags1.getTags());
+        });
+
+        categoryTags1.on('remove', (tag) => {
+            console.log('Removed tag:', tag);
+        });
+
+        categoryTags1.on('error', (msg) => {
+            console.error(msg);
+        });
+
+    </script>
+</body>
+
+</html>
